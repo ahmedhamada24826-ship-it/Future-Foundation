@@ -1,0 +1,43 @@
+# Dependencies
+node_modules
+.pnp
+.pnp.js
+
+# Testing & build outputs
+.next/
+out/
+build/
+dist/
+
+# Local SQLite databases & Prisma local files
+prisma/*.db
+prisma/*.db-journal
+
+# Environment variables & secrets (NEVER COMMIT)
+.env
+.env*.local
+.env.development
+.env.test
+.env.production
+*.env
+
+# Debug & Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+.pnpm-debug.log*
+
+# OS Files
+.DS_Store
+*.pem
+Thumbs.db
+
+# IDE Files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# TypeScript build cache
+*.tsbuildinfo

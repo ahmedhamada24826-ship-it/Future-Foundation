@@ -1,0 +1,81 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Applicant {
+  id                String     @id @default(cuid())
+  applicationId     String     @unique
+  fullName          String
+  email             String     @unique
+  phone             String
+  governorate       String
+  age               Int
+  educationLevel    String
+  occupation        String
+  interests         String
+  motivation        String
+  linkedinUrl       String?
+  referralSource    String
+  status            String     @default("PENDING")
+  registeredAt      DateTime   @default(now())
+  acceptedAt        DateTime?
+  emailSentAt       DateTime?
+  emailSendAttempts Int        @default(0)
+  emailLastError    String?
+  createdAt         DateTime   @default(now())
+  updatedAt         DateTime   @updatedAt
+  emailLogs         EmailLog[]
+
+  @@index([status])
+  @@index([registeredAt])
+  @@index([email])
+  @@index([applicationId])
+}
+
+model AdminUser {
+  id           String   @id @default(cuid())
+  name         String
+  email        String   @unique
+  passwordHash String
+  role         String   @default("ADMIN")
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model Setting {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  value     String
+  updatedAt DateTime @updatedAt
+}
+
+model EmailLog {
+  id          String    @id @default(cuid())
+  applicantId String
+  recipient   String
+  subject     String
+  status      String
+  error       String?
+  sentAt      DateTime  @default(now())
+  applicant   Applicant @relation(fields: [applicantId], references: [id], onDelete: Cascade)
+
+  @@index([applicantId])
+  @@index([sentAt])
+}
+
+model Partner {
+  id        String   @id @default(cuid())
+  name      String
+  category  String
+  logoUrl   String
+  darkCard  Boolean  @default(false)
+  order     Int      @default(0)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
