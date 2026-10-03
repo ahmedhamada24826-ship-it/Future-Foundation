@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+  <title id="title">WAST partner logo</title>
+  <desc id="desc">A circular badge with WAST text and decorative star motif.</desc>
+  <defs>
+    <radialGradient id="bg" cx="50%" cy="35%" r="65%">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="100%" stop-color="#f5f7fa"/>
+    </radialGradient>
+  </defs>
+  <rect width="512" height="512" fill="#f6f7fb"/>
+  <circle cx="256" cy="256" r="190" fill="url(#bg)" stroke="#111827" stroke-width="10"/>
+  <circle cx="256" cy="256" r="152" fill="none" stroke="#111827" stroke-width="8" opacity="0.9"/>
+  <g fill="#111827" font-family="Arial, sans-serif" font-weight="700" text-anchor="middle">
+    <text x="256" y="235" font-size="70">W</text>
+    <text x="256" y="300" font-size="70">A</text>
+    <text x="256" y="365" font-size="70">ST</text>
+  </g>
+  <g stroke="#111827" stroke-width="5" stroke-linecap="round" opacity="0.9">
+    <path d="M256 128 L263 160 L292 130 L276 163 L310 164 L278 181 L302 210 L266 197 L267 234 L246 199 L227 234 L228 197 L192 210 L216 181 L184 164 L218 163 L202 130 L231 160 Z" fill="none"/>
+  </g>
+  <g fill="#111827" font-family="Arial, sans-serif" font-size="18" font-weight="700" text-anchor="middle">
+    <text x="256" y="380">وزارة الشباب والرياضة</text>
+  </g>
+</svg>
