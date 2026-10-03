@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Handshake } from 'lucide-react';
+import { PartnerLogo } from '@/components/ui/PartnerLogo';
 import { INITIAL_PARTNERS } from '@/lib/db/seed-partners';
 
 interface PartnerItem {
@@ -86,12 +87,13 @@ export const Partners: React.FC = () => {
             >
               {/* Logo Area */}
               <div className="w-full h-28 sm:h-32 flex items-center justify-center p-2">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
+                <PartnerLogo
                   src={partner.logoUrl}
                   alt={partner.name}
+                  name={partner.name}
+                  darkCard={Boolean(partner.darkCard)}
                   className="max-h-full max-w-full object-contain transition-transform duration-300 group-hover:scale-105"
-                  loading="lazy"
+                  fallbackClassName="h-full w-full"
                 />
               </div>
 

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db/prisma';
 import { getCurrentAdmin } from '@/lib/auth/session';
+import { cleanupBrokenPartnerLinks } from '@/lib/db/partner-cleanup';
 import { ensureDefaultPartners } from '@/lib/db/seed-partners';
 import { getSystemSettings, updateSystemSettings } from '@/lib/settings/settings';
 
@@ -9,6 +10,7 @@ export const dynamic = 'force-dynamic';
 // GET: Fetch partners and section texts
 export async function GET(req: NextRequest) {
   try {
+    await cleanupBrokenPartnerLinks();
     await ensureDefaultPartners();
 
     const { searchParams } = new URL(req.url);

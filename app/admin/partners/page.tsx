@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { AdminNav } from '@/components/admin/AdminNav';
+import { PartnerLogo } from '@/components/ui/PartnerLogo';
 import {
   Handshake,
   Plus,
@@ -422,11 +423,13 @@ export default function AdminPartnersPage() {
                         : 'bg-slate-50 border-slate-100'
                     }`}
                   >
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
+                    <PartnerLogo
                       src={partner.logoUrl}
                       alt={partner.name}
+                      name={partner.name}
+                      darkCard={partner.darkCard}
                       className="max-h-full max-w-full object-contain"
+                      fallbackClassName="h-full w-full"
                     />
                   </div>
 
@@ -583,11 +586,13 @@ export default function AdminPartnersPage() {
                       : 'bg-slate-50 border-slate-200'
                   }`}
                 >
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
+                  <PartnerLogo
                     src={formData.logoUrl}
-                    alt="Logo Preview"
+                    alt={formData.name || 'Logo Preview'}
+                    name={formData.name || 'Partner'}
+                    darkCard={formData.darkCard}
                     className="max-h-full max-w-full object-contain"
+                    fallbackClassName="h-full w-full"
                   />
                 </div>
               )}
