@@ -28,7 +28,7 @@ export async function POST(req: NextRequest) {
       .replace(ext, '')
       .toLowerCase()
       .replace(/[^a-z0-9]/g, '-');
-    const filename = `partner-${cleanName}-${Date.now()}${ext}`;
+    const filename = `partner-logo-${cleanName}-${Date.now()}${ext}`;
 
     const uploadDir = path.join(process.cwd(), 'public', 'images', 'partners');
     fs.mkdirSync(uploadDir, { recursive: true });

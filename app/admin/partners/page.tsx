@@ -390,15 +390,21 @@ export default function AdminPartnersPage() {
               {partners.map((partner) => (
                 <div
                   key={partner.id}
-                  className={`rounded-2xl border p-5 transition-all relative flex flex-col justify-between ${
+                  className={`rounded-2xl border p-5 transition-all relative flex flex-col justify-between overflow-hidden ${
                     partner.isActive
-                      ? 'border-slate-200 bg-white hover:border-blue-300 hover:shadow-md'
+                      ? partner.darkCard
+                        ? 'border-slate-900 bg-slate-950 text-white hover:border-blue-500/50 hover:shadow-lg hover:shadow-blue-950/20'
+                        : 'border-slate-200 bg-white text-slate-800 hover:border-blue-300 hover:shadow-md'
                       : 'border-dashed border-slate-300 bg-slate-50/60 opacity-70'
                   }`}
                 >
                   {/* Card Top / Badges */}
                   <div className="flex items-center justify-between mb-3 text-[11px] font-bold">
-                    <span className="flex items-center gap-1 text-slate-400 bg-slate-100 px-2 py-0.5 rounded-md">
+                    <span
+                      className={`flex items-center gap-1 px-2 py-0.5 rounded-md ${
+                        partner.darkCard ? 'text-slate-300 bg-slate-800' : 'text-slate-400 bg-slate-100'
+                      }`}
+                    >
                       <ArrowUpDown className="w-3 h-3" />
                       <span>الترتيب: {partner.order}</span>
                     </span>
@@ -406,7 +412,7 @@ export default function AdminPartnersPage() {
                     <span
                       className={`px-2 py-0.5 rounded-md flex items-center gap-1 ${
                         partner.darkCard
-                          ? 'bg-slate-900 text-blue-300'
+                          ? 'bg-blue-500/10 text-blue-200'
                           : 'bg-blue-50 text-kemix-blue'
                       }`}
                     >
@@ -419,7 +425,7 @@ export default function AdminPartnersPage() {
                   <div
                     className={`w-full h-28 rounded-xl flex items-center justify-center p-3 mb-4 border ${
                       partner.darkCard
-                        ? 'bg-slate-950 border-slate-800'
+                        ? 'bg-[#040d1b] border-slate-800 shadow-inner shadow-blue-500/10'
                         : 'bg-slate-50 border-slate-100'
                     }`}
                   >
@@ -435,8 +441,12 @@ export default function AdminPartnersPage() {
 
                   {/* Info */}
                   <div className="text-right space-y-1 mb-4 flex-1">
-                    <h3 className="font-extrabold text-sm text-kemix-navy">{partner.name}</h3>
-                    <p className="text-xs text-slate-500 truncate">{partner.category || '—'}</p>
+                    <h3 className={`font-extrabold text-sm ${partner.darkCard ? 'text-white' : 'text-kemix-navy'}`}>
+                      {partner.name}
+                    </h3>
+                    <p className={`text-xs truncate ${partner.darkCard ? 'text-slate-300' : 'text-slate-500'}`}>
+                      {partner.category || '—'}
+                    </p>
                   </div>
 
                   {/* Actions Bar */}

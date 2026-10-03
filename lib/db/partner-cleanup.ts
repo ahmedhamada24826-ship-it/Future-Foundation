@@ -14,12 +14,6 @@ export async function cleanupBrokenPartnerLinks() {
 
       if (!partner.logoUrl.startsWith('/')) continue;
 
-      const isLegacyUploadedAsset = partner.logoUrl.includes('partner-image-');
-      if (isLegacyUploadedAsset) {
-        await prisma.partner.delete({ where: { id: partner.id } });
-        continue;
-      }
-
       const publicPath = path.join(process.cwd(), 'public', partner.logoUrl.replace(/^\/+/, ''));
       if (!fs.existsSync(publicPath)) {
         await prisma.partner.delete({ where: { id: partner.id } });
