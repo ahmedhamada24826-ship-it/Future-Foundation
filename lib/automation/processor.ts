@@ -16,15 +16,11 @@ export interface AutomationResult {
   }>;
 }
 
-export interface AutomationOptions {
-  skipDelay?: boolean;
-}
-
-const MAX_EMAILS_PER_RUN = 10;
+const MAX_EMAILS_PER_RUN = 1;
 const MAX_AUTOMATED_EMAIL_ATTEMPTS = 8;
 const EMAIL_RETRY_INTERVAL_MS = 60 * 60 * 1000;
 
-export async function processAutomaticAcceptance(options?: AutomationOptions): Promise<AutomationResult> {
+export async function processAutomaticAcceptance(): Promise<AutomationResult> {
   const settings = await getSystemSettings();
 
   if (!settings.auto_acceptance_enabled) {
@@ -38,22 +34,26 @@ export async function processAutomaticAcceptance(options?: AutomationOptions): P
   }
 
   // Calculate cutoff timestamp: now - acceptance_delay_hours (sourced strictly from settings)
-  const delayHours = Math.max(0, Number(settings.acceptance_delay_hours) || 24);
+  const configuredDelayHours = Number(settings.acceptance_delay_hours);
+  const delayHours = Number.isFinite(configuredDelayHours)
+    ? Math.max(0, configuredDelayHours)
+    : 24;
   const cutoffDate = new Date(Date.now() - delayHours * 3600 * 1000);
-  const emailIntervalMs = Math.max(0, (Number(settings.email_delay_seconds) ?? 60) * 1000);
 
   // Find all PENDING applicants who registered before the cutoff time
-  const eligibleApplicants = await prisma.applicant.findMany({
-    where: {
-      status: 'PENDING',
-      registeredAt: {
-        lte: cutoffDate,
-      },
-    },
-    orderBy: {
-      registeredAt: 'asc',
-    },
-  });
+  const eligibleApplicants = settings.auto_acceptance_enabled
+    ? await prisma.applicant.findMany({
+        where: {
+          status: 'PENDING',
+          registeredAt: {
+            lte: cutoffDate,
+          },
+        },
+        orderBy: {
+          registeredAt: 'asc',
+        },
+      })
+    : [];
 
   const result: AutomationResult = {
     processedCount: eligibleApplicants.length,
@@ -174,10 +174,6 @@ export async function processAutomaticAcceptance(options?: AutomationOptions): P
         }
       }
 
-      if (i < emailCandidates.length - 1 && !options?.skipDelay && emailIntervalMs > 0) {
-        console.log(`[EMAIL-INTERVAL] Waiting ${emailIntervalMs / 1000}s before sending next email...`);
-        await new Promise((resolve) => setTimeout(resolve, emailIntervalMs));
-      }
     } catch (err: any) {
       result.errorsCount += 1;
       result.details.push({

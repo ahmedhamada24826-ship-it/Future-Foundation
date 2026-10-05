@@ -57,7 +57,7 @@ export async function getSystemSettings(): Promise<SystemSettings> {
         ? Number(map.get('email_delay_seconds'))
         : DEFAULT_SETTINGS.email_delay_seconds,
       email_sender_name: map.get('email_sender_name') || process.env.EMAIL_SENDER_NAME || DEFAULT_SETTINGS.email_sender_name,
-      email_sender_address: map.get('email_sender_address') || process.env.EMAIL_FROM || DEFAULT_SETTINGS.email_sender_address,
+      email_sender_address: process.env.EMAIL_FROM || map.get('email_sender_address') || DEFAULT_SETTINGS.email_sender_address,
       linkedin_share_text: map.get('linkedin_share_text') || DEFAULT_SETTINGS.linkedin_share_text,
       program_website_url: map.get('program_website_url') || process.env.APP_URL || DEFAULT_SETTINGS.program_website_url,
       partners_title: map.get('partners_title') || DEFAULT_SETTINGS.partners_title,
