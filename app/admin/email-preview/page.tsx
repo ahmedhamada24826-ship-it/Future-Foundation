@@ -3,20 +3,12 @@
 import React, { useState } from 'react';
 import { AdminNav } from '@/components/admin/AdminNav';
 import { renderAcceptanceEmailHtml } from '@/lib/email/template';
-import { Mail, Send, CheckCircle2, AlertCircle, Laptop, Smartphone } from 'lucide-react';
+import { Mail, Laptop, Smartphone } from 'lucide-react';
 
 export default function EmailPreviewPage() {
   const [applicantName, setApplicantName] = useState('أحمد محمود القاضي');
   const [applicationId, setApplicationId] = useState('FF-2026-000001');
-  const [testEmail, setTestEmail] = useState('kemixacademy1@gmail.com');
   const [deviceView, setDeviceView] = useState<'desktop' | 'mobile'>('desktop');
-  const [isSending, setIsSending] = useState(false);
-  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
-
-  const showToast = (message: string, type: 'success' | 'error' = 'success') => {
-    setToast({ message, type });
-    setTimeout(() => setToast(null), 4000);
-  };
 
   const htmlContent = renderAcceptanceEmailHtml({
     fullName: applicantName,
@@ -28,38 +20,9 @@ export default function EmailPreviewPage() {
     websiteUrl: 'https://kemics.academy',
   });
 
-  const handleSendTest = async () => {
-    if (!testEmail) {
-      showToast('يرجى إدخال بريد إلكتروني صالح للإرسال التجريبي', 'error');
-      return;
-    }
-    setIsSending(true);
-    try {
-      setTimeout(() => {
-        showToast(`تم إرسال بريد القبول التجريبي بنجاح إلى: ${testEmail}`);
-        setIsSending(false);
-      }, 1000);
-    } catch (e) {
-      showToast('فشل الإرسال التجريبي', 'error');
-      setIsSending(false);
-    }
-  };
-
   return (
     <div className="min-h-screen bg-slate-100 text-slate-900 flex flex-col font-sans">
       <AdminNav />
-
-      {/* Toast Alert */}
-      {toast && (
-        <div
-          className={`fixed bottom-6 left-6 z-50 px-5 py-3.5 rounded-2xl shadow-xl flex items-center gap-3 text-sm font-bold text-white transition-all animate-in slide-in-from-bottom-5 ${
-            toast.type === 'success' ? 'bg-emerald-600' : 'bg-red-600'
-          }`}
-        >
-          {toast.type === 'success' ? <CheckCircle2 className="w-5 h-5" /> : <AlertCircle className="w-5 h-5" />}
-          <span>{toast.message}</span>
-        </div>
-      )}
 
       <main className="max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-1 space-y-6">
         
@@ -131,32 +94,8 @@ export default function EmailPreviewPage() {
               />
             </div>
 
-            <div className="pt-4 border-t border-slate-100">
-              <label className="block text-xs font-bold text-slate-700 mb-1.5">إرسال بريد تجريبي إلى:</label>
-              <div className="flex items-center gap-2">
-                <input
-                  type="email"
-                  dir="ltr"
-                  value={testEmail}
-                  onChange={(e) => setTestEmail(e.target.value)}
-                  className="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-xs focus:ring-2 focus:ring-kemix-blue/20"
-                  placeholder="test@example.com"
-                />
-              </div>
-              <button
-                onClick={handleSendTest}
-                disabled={isSending}
-                className="w-full mt-3 bg-kemix-navy hover:bg-slate-900 text-white font-bold text-xs py-2.5 rounded-xl shadow-xs flex items-center justify-center gap-2 transition-colors disabled:opacity-60"
-              >
-                {isSending ? (
-                  <span>جاري الإرسال...</span>
-                ) : (
-                  <>
-                    <Send className="w-3.5 h-3.5" />
-                    <span>إرسال بريد تجريبي</span>
-                  </>
-                )}
-              </button>
+            <div className="mt-4 rounded-xl border border-amber-200 bg-amber-50 p-3 text-xs leading-relaxed text-amber-900">
+              هذه معاينة للقالب فقط ولا ترسل بريدًا فعليًا. تم إيقاف الإرسال حتى إعداد مزوّد بريد موثّق.
             </div>
           </div>
 

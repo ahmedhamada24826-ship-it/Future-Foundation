@@ -94,6 +94,7 @@ npm run dev
 | `SMTP_USER` | اسم مستخدم SMTP | `kemixacademy1@gmail.com` |
 | `SMTP_PASS` | كلمة مرور التطبيق (App Password) | `xxxx xxxx xxxx xxxx` |
 | `APP_URL` | الرابط الأساسي للمنصة المنشورة | `https://future-foundation.kemics.academy` |
+| `NEXT_PUBLIC_APP_URL` | الرابط العام الأساسي نفسه؛ تستخدمه معاينات LinkedIn وروبوتات Open Graph | `https://future-foundation.kemics.academy` |
 
 ---
 

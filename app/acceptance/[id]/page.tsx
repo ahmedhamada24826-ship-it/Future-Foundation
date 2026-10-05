@@ -13,7 +13,7 @@ interface PageProps {
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { id } = params;
-  const baseUrl = process.env.APP_URL || 'https://kemics.academy';
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.APP_URL || 'https://kemics.academy';
 
   const applicant = await prisma.applicant.findFirst({
     where: { OR: [{ id: id }, { applicationId: id }] },
@@ -57,7 +57,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 export default async function AcceptanceCelebrationPage({ params }: PageProps) {
   const { id } = params;
-  const baseUrl = process.env.APP_URL || 'https://kemics.academy';
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.APP_URL || 'https://kemics.academy';
 
   const applicant = await prisma.applicant.findFirst({
     where: { OR: [{ id: id }, { applicationId: id }] },
@@ -149,7 +149,7 @@ export default async function AcceptanceCelebrationPage({ params }: PageProps) {
               </a>
 
               <p className="text-xs text-slate-400">
-                * عند الضغط سيتم فتح LinkedIn ومشاركة البانر الرسمي الخاص بالقبول بالحجم الكامل في صفحتك.
+                * ستتم مشاركة رابط بطاقة القبول؛ ويجلب LinkedIn البانر من معاينة الصفحة. قد يتأخر ظهور الصورة بسبب ذاكرة LinkedIn المؤقتة.
               </p>
             </div>
 
