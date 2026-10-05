@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db/prisma';
 import { getCurrentAdmin } from '@/lib/auth/session';
+import { normalizeLogoUrl } from '@/lib/utils/normalize-logo-url';
 
 export const dynamic = 'force-dynamic';
 
@@ -27,7 +28,7 @@ export async function PUT(req: NextRequest, { params }: RouteParams) {
     const updateData: any = {};
     if (body.name !== undefined) updateData.name = body.name.trim();
     if (body.category !== undefined) updateData.category = body.category.trim();
-    if (body.logoUrl !== undefined) updateData.logoUrl = body.logoUrl.trim();
+    if (body.logoUrl !== undefined) updateData.logoUrl = normalizeLogoUrl(String(body.logoUrl));
     if (body.darkCard !== undefined) updateData.darkCard = Boolean(body.darkCard);
     if (body.order !== undefined) updateData.order = Number(body.order);
     if (body.isActive !== undefined) updateData.isActive = Boolean(body.isActive);

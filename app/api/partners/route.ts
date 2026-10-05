@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db/prisma';
 import { getCurrentAdmin } from '@/lib/auth/session';
-import { cleanupBrokenPartnerLinks } from '@/lib/db/partner-cleanup';
+import { normalizeLogoUrl } from '@/lib/utils/normalize-logo-url';
 import { ensureDefaultPartners } from '@/lib/db/seed-partners';
 import { getSystemSettings, updateSystemSettings } from '@/lib/settings/settings';
 
@@ -10,7 +10,6 @@ export const dynamic = 'force-dynamic';
 // GET: Fetch partners and section texts
 export async function GET(req: NextRequest) {
   try {
-    await cleanupBrokenPartnerLinks();
     await ensureDefaultPartners();
 
     const { searchParams } = new URL(req.url);
@@ -21,6 +20,11 @@ export async function GET(req: NextRequest) {
       where,
       orderBy: [{ order: 'asc' }, { createdAt: 'asc' }],
     });
+
+    const normalizedPartners = partners.map((partner) => ({
+      ...partner,
+      logoUrl: normalizeLogoUrl(partner.logoUrl || ''),
+    }));
 
     const settings = await getSystemSettings();
 
@@ -34,7 +38,7 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      data: partners,
+      data: normalizedPartners,
       section: sectionInfo,
     });
   } catch (error: any) {
@@ -73,8 +77,9 @@ export async function POST(req: NextRequest) {
 
     // Otherwise adding new partner
     const { name, category, logoUrl, darkCard, order, isActive } = body;
+    const normalizedLogoUrl = normalizeLogoUrl(logoUrl || '');
 
-    if (!name || !logoUrl) {
+    if (!name || !normalizedLogoUrl) {
       return NextResponse.json(
         { success: false, message: 'اسم الشريك ورابط الشعار مطلوبان' },
         { status: 400 }
@@ -85,7 +90,7 @@ export async function POST(req: NextRequest) {
       data: {
         name: name.trim(),
         category: (category || '').trim(),
-        logoUrl: logoUrl.trim(),
+        logoUrl: normalizedLogoUrl,
         darkCard: Boolean(darkCard),
         order: Number(order) || 0,
         isActive: isActive !== undefined ? Boolean(isActive) : true,

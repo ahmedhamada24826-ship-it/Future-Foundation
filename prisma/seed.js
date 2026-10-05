@@ -23,7 +23,7 @@ const INITIAL_PARTNERS = [
   {
     name: 'VINANCE',
     category: 'شريك تكنولوجي واستثماري',
-    logoUrl: '/images/partners/partner-vinance.png',
+    logoUrl: '/images/partners/partner-vinance-transparent.png',
     darkCard: true,
     order: 3,
     isActive: true,
@@ -31,7 +31,7 @@ const INITIAL_PARTNERS = [
   {
     name: 'COBRA CODE',
     category: 'مجتمع البرمجة والتطوير',
-    logoUrl: '/images/partners/partner-cobra-code.png',
+    logoUrl: '/images/partners/partner-cobra-code-transparent.png',
     darkCard: true,
     order: 4,
     isActive: true,

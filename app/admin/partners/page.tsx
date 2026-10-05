@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { AdminNav } from '@/components/admin/AdminNav';
 import { PartnerLogo } from '@/components/ui/PartnerLogo';
+import { normalizeLogoUrl } from '@/lib/utils/normalize-logo-url';
 import {
   Handshake,
   Plus,
@@ -171,7 +172,7 @@ export default function AdminPartnersPage() {
 
       const data = await res.json();
       if (res.ok && data.url) {
-        setFormData((prev) => ({ ...prev, logoUrl: data.url }));
+        setFormData((prev) => ({ ...prev, logoUrl: normalizeLogoUrl(data.url) }));
         showToast('تم رفع صورة الشعار بنجاح');
       } else {
         showToast(data.message || 'فشل رفع الشعار', 'error');
@@ -195,10 +196,12 @@ export default function AdminPartnersPage() {
       const url = editingPartner ? `/api/partners/${editingPartner.id}` : '/api/partners';
       const method = editingPartner ? 'PUT' : 'POST';
 
+      const payload = { ...formData, logoUrl: normalizeLogoUrl(formData.logoUrl) };
+
       const res = await fetch(url, {
         method,
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(payload),
       });
 
       const data = await res.json();
@@ -386,115 +389,123 @@ export default function AdminPartnersPage() {
               </button>
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
               {partners.map((partner) => (
                 <div
                   key={partner.id}
-                  className={`rounded-2xl border p-5 transition-all relative flex flex-col justify-between overflow-hidden ${
+                  className={`relative flex flex-col justify-between overflow-hidden rounded-[26px] border p-0 transition-all duration-300 ${
                     partner.isActive
                       ? partner.darkCard
-                        ? 'border-slate-900 bg-slate-950 text-white hover:border-blue-500/50 hover:shadow-lg hover:shadow-blue-950/20'
-                        : 'border-slate-200 bg-white text-slate-800 hover:border-blue-300 hover:shadow-md'
+                        ? 'border-slate-800 bg-[#071827] text-white shadow-[0_18px_40px_rgba(15,23,42,0.35)] hover:border-blue-400/70 hover:shadow-[0_24px_55px_rgba(59,130,246,0.18)]'
+                        : 'border-slate-200 bg-white text-slate-800 shadow-[0_14px_28px_rgba(15,23,42,0.06)] hover:border-kemix-blue/40 hover:shadow-[0_18px_35px_rgba(59,130,246,0.12)]'
                       : 'border-dashed border-slate-300 bg-slate-50/60 opacity-70'
                   }`}
                 >
-                  {/* Card Top / Badges */}
-                  <div className="flex items-center justify-between mb-3 text-[11px] font-bold">
+                  <div
+                    className={`flex items-center justify-between border-b px-3 py-2.5 text-[11px] font-bold ${
+                      partner.darkCard ? 'border-slate-800 bg-slate-950/30' : 'border-slate-100 bg-slate-50/80'
+                    }`}
+                  >
                     <span
-                      className={`flex items-center gap-1 px-2 py-0.5 rounded-md ${
-                        partner.darkCard ? 'text-slate-300 bg-slate-800' : 'text-slate-400 bg-slate-100'
+                      className={`inline-flex items-center gap-1 rounded-full px-2 py-1 ${
+                        partner.darkCard ? 'bg-slate-800 text-slate-200' : 'bg-white text-slate-500'
                       }`}
                     >
                       <ArrowUpDown className="w-3 h-3" />
-                      <span>الترتيب: {partner.order}</span>
+                      <span>#{partner.order}</span>
                     </span>
 
                     <span
-                      className={`px-2 py-0.5 rounded-md flex items-center gap-1 ${
-                        partner.darkCard
-                          ? 'bg-blue-500/10 text-blue-200'
-                          : 'bg-blue-50 text-kemix-blue'
+                      className={`inline-flex items-center gap-1 rounded-full px-2 py-1 ${
+                        partner.darkCard ? 'bg-blue-500/10 text-blue-200' : 'bg-blue-50 text-kemix-blue'
                       }`}
                     >
                       {partner.darkCard ? <Moon className="w-3 h-3" /> : <Sun className="w-3 h-3" />}
-                      <span>{partner.darkCard ? 'بطاقة داكنة' : 'بطاقة فاتحة'}</span>
+                      <span>{partner.darkCard ? 'داكن' : 'فاتح'}</span>
                     </span>
                   </div>
 
-                  {/* Logo Display */}
                   <div
-                    className={`w-full h-28 rounded-xl flex items-center justify-center p-3 mb-4 border ${
-                      partner.darkCard
-                        ? 'bg-[#040d1b] border-slate-800 shadow-inner shadow-blue-500/10'
-                        : 'bg-slate-50 border-slate-100'
+                    className={`flex h-36 items-center justify-center border-b p-4 ${
+                      partner.darkCard ? 'border-slate-800 bg-slate-950/40' : 'border-slate-100 bg-slate-50/70'
                     }`}
                   >
-                    <PartnerLogo
-                      src={partner.logoUrl}
-                      alt={partner.name}
-                      name={partner.name}
-                      darkCard={partner.darkCard}
-                      className="max-h-full max-w-full object-contain"
-                      fallbackClassName="h-full w-full"
-                    />
-                  </div>
-
-                  {/* Info */}
-                  <div className="text-right space-y-1 mb-4 flex-1">
-                    <h3 className={`font-extrabold text-sm ${partner.darkCard ? 'text-white' : 'text-kemix-navy'}`}>
-                      {partner.name}
-                    </h3>
-                    <p className={`text-xs truncate ${partner.darkCard ? 'text-slate-300' : 'text-slate-500'}`}>
-                      {partner.category || '—'}
-                    </p>
-                  </div>
-
-                  {/* Actions Bar */}
-                  <div className="pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
-                    <button
-                      onClick={() => togglePartnerStatus(partner)}
-                      className={`flex items-center gap-1 font-semibold ${
-                        partner.isActive ? 'text-emerald-600 hover:text-emerald-700' : 'text-slate-400 hover:text-slate-600'
+                    <div
+                      className={`flex h-full w-full items-center justify-center rounded-2xl border p-3 ${
+                        partner.darkCard ? 'border-slate-800 bg-[#091827]' : 'border-slate-200 bg-white'
                       }`}
-                      title={partner.isActive ? 'تعطيل الظهور' : 'تفعيل الظهور'}
                     >
-                      {partner.isActive ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
-                      <span>{partner.isActive ? 'نشط' : 'مخفي'}</span>
-                    </button>
+                      <PartnerLogo
+                        src={partner.logoUrl}
+                        alt={partner.name}
+                        name={partner.name}
+                        darkCard={partner.darkCard}
+                        className="max-h-full max-w-full object-contain"
+                        fallbackClassName="h-full w-full"
+                      />
+                    </div>
+                  </div>
 
-                    <div className="flex items-center gap-2">
+                  <div className="flex flex-1 flex-col justify-between p-4">
+                    <div className="mb-4 space-y-1 text-right">
+                      <h3 className={`text-base font-black ${partner.darkCard ? 'text-white' : 'text-kemix-navy'}`}>
+                        {partner.name}
+                      </h3>
+                      <p className={`text-xs ${partner.darkCard ? 'text-slate-300' : 'text-slate-500'}`}>
+                        {partner.category || '—'}
+                      </p>
+                    </div>
+
+                    <div
+                      className={`flex items-center justify-between rounded-2xl border px-2 py-2 ${
+                        partner.darkCard ? 'border-slate-800 bg-slate-950/20' : 'border-slate-100 bg-slate-50'
+                      }`}
+                    >
                       <button
-                        onClick={() => openEditModal(partner)}
-                        className="p-1.5 text-slate-500 hover:text-kemix-blue hover:bg-blue-50 rounded-lg transition-colors"
-                        title="تعديل"
+                        onClick={() => togglePartnerStatus(partner)}
+                        className={`inline-flex items-center gap-1 rounded-lg px-2 py-1 text-[11px] font-bold ${
+                          partner.isActive ? 'text-emerald-600 hover:bg-emerald-50' : 'text-slate-400 hover:bg-slate-100'
+                        }`}
+                        title={partner.isActive ? 'تعطيل الظهور' : 'تفعيل الظهور'}
                       >
-                        <Edit2 className="w-4 h-4" />
+                        {partner.isActive ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
+                        <span>{partner.isActive ? 'نشط' : 'مخفي'}</span>
                       </button>
 
-                      {deleteConfirmId === partner.id ? (
-                        <div className="flex items-center gap-1 bg-red-50 p-1 rounded-lg border border-red-200">
-                          <button
-                            onClick={() => handleDeletePartner(partner.id)}
-                            className="text-[10px] bg-red-600 text-white px-2 py-0.5 rounded font-bold hover:bg-red-700"
-                          >
-                            تأكيد الحذف
-                          </button>
-                          <button
-                            onClick={() => setDeleteConfirmId(null)}
-                            className="text-[10px] text-slate-500 hover:text-slate-700 px-1"
-                          >
-                            إلغاء
-                          </button>
-                        </div>
-                      ) : (
+                      <div className="flex items-center gap-1.5">
                         <button
-                          onClick={() => setDeleteConfirmId(partner.id)}
-                          className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                          title="حذف"
+                          onClick={() => openEditModal(partner)}
+                          className="rounded-lg p-1.5 text-slate-500 transition-colors hover:bg-blue-50 hover:text-kemix-blue"
+                          title="تعديل"
                         >
-                          <Trash2 className="w-4 h-4" />
+                          <Edit2 className="w-4 h-4" />
                         </button>
-                      )}
+
+                        {deleteConfirmId === partner.id ? (
+                          <div className="flex items-center gap-1 rounded-lg border border-red-200 bg-red-50 p-1">
+                            <button
+                              onClick={() => handleDeletePartner(partner.id)}
+                              className="rounded bg-red-600 px-2 py-0.5 text-[10px] font-bold text-white hover:bg-red-700"
+                            >
+                              تأكيد الحذف
+                            </button>
+                            <button
+                              onClick={() => setDeleteConfirmId(null)}
+                              className="px-1 text-[10px] text-slate-500 hover:text-slate-700"
+                            >
+                              إلغاء
+                            </button>
+                          </div>
+                        ) : (
+                          <button
+                            onClick={() => setDeleteConfirmId(partner.id)}
+                            className="rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-red-50 hover:text-red-600"
+                            title="حذف"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        )}
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -556,34 +567,48 @@ export default function AdminPartnersPage() {
                   شعار الشريك (Logo) <span className="text-red-500">*</span>
                 </label>
 
-                <div className="flex gap-2">
-                  <input
-                    type="text"
-                    required
-                    dir="ltr"
-                    value={formData.logoUrl}
-                    onChange={(e) => setFormData({ ...formData, logoUrl: e.target.value })}
-                    placeholder="/images/partners/partner-name.png أو رابط صورة"
-                    className="flex-1 px-4 py-2.5 rounded-xl border border-slate-200 text-xs font-mono text-left focus:ring-2 focus:ring-kemix-blue/20 focus:border-kemix-blue"
-                  />
+                <div className="space-y-3">
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      required
+                      dir="ltr"
+                      value={formData.logoUrl}
+                      onChange={(e) =>
+                        setFormData({ ...formData, logoUrl: normalizeLogoUrl(e.target.value) })
+                      }
+                      placeholder="/images/partners/partner-name.png أو رابط صورة"
+                      className="flex-1 px-4 py-2.5 rounded-xl border border-slate-200 text-xs font-mono text-left focus:ring-2 focus:ring-kemix-blue/20 focus:border-kemix-blue"
+                    />
+                  </div>
 
-                  <input
-                    type="file"
-                    ref={fileInputRef}
-                    onChange={handleFileUpload}
-                    accept="image/*"
-                    className="hidden"
-                  />
+                  <div className="rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-3">
+                    <div className="flex items-center justify-between gap-3">
+                      <div className="flex-1 min-w-0">
+                        <p className="text-[11px] font-bold text-slate-600">رفع صورة مباشرة</p>
+                        <p className="text-[10px] text-slate-500 mt-0.5">PNG, JPG, SVG — سيتم حفظها داخل مجلد الصور الخاص بالموقع</p>
+                      </div>
 
-                  <button
-                    type="button"
-                    onClick={() => fileInputRef.current?.click()}
-                    disabled={isUploading}
-                    className="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold px-3 py-2.5 rounded-xl text-xs flex items-center gap-1.5 transition-colors shrink-0"
-                  >
-                    <Upload className="w-3.5 h-3.5" />
-                    <span>{isUploading ? 'جاري الرفع...' : 'رفع صورة'}</span>
-                  </button>
+                      <div>
+                        <input
+                          type="file"
+                          ref={fileInputRef}
+                          onChange={handleFileUpload}
+                          accept="image/*"
+                          className="hidden"
+                          id="partner-logo-upload"
+                        />
+
+                        <label
+                          htmlFor="partner-logo-upload"
+                          className="inline-flex cursor-pointer items-center justify-center gap-1.5 rounded-xl bg-kemix-blue px-3 py-2.5 text-[11px] font-bold text-white shadow-sm transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
+                        >
+                          <Upload className="w-3.5 h-3.5" />
+                          <span>{isUploading ? 'جاري الرفع...' : 'رفع صورة'}</span>
+                        </label>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
 

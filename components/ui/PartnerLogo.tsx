@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { ImageOff } from 'lucide-react';
+import { normalizeLogoUrl } from '@/lib/utils/normalize-logo-url';
 
 interface PartnerLogoProps {
   src?: string | null;
@@ -21,6 +22,7 @@ export function PartnerLogo({
   fallbackClassName = '',
 }: PartnerLogoProps) {
   const [hasError, setHasError] = useState(false);
+  const safeSrc = normalizeLogoUrl(src || '');
 
   const fallbackText = (name || alt || 'Partner')
     .split(/\s+/)
@@ -29,7 +31,7 @@ export function PartnerLogo({
     .map((part) => part[0]?.toUpperCase() || '')
     .join('') || 'P';
 
-  if (!src || hasError) {
+  if (!safeSrc || hasError) {
     return (
       <div
         className={[
@@ -50,7 +52,7 @@ export function PartnerLogo({
 
   return (
     <img
-      src={src}
+      src={safeSrc}
       alt={alt}
       className={className}
       loading="lazy"

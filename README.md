@@ -11,7 +11,7 @@
 [Public Registration Page (/future-foundation)]
                      │
                      ▼ (Server-side validation & Rate Limiting)
-[Database (Prisma ORM + PostgreSQL / SQLite)] ◄── Unique Application ID (FF-2026-XXXXXX)
+[Persistent PostgreSQL (Prisma ORM)] ◄── Unique Application ID (FF-2026-XXXXXX)
                      │
                      ▼ (Status: PENDING)
 [Configurable Delay Queue (Default: 24h)]
@@ -35,14 +35,24 @@
 npm install
 ```
 
-### 2. تجهيز قاعدة البيانات:
+### 2. تجهيز قاعدة البيانات الدائمة:
 ```bash
 npx prisma generate
 npx prisma db push
 node prisma/seed.js
 ```
 
-### 3. تشغيل الخادم في وضع التطوير:
+استخدم PostgreSQL مستضافًا دائمًا في `DATABASE_URL`؛ لا تستخدم SQLite أو قاعدة داخل مجلد التطبيق في الإنتاج. لا تُعد تهيئة قاعدة الإنتاج أو تشغيل `db push` عليها إلا بعد مراجعة التغييرات وأخذ نسخة احتياطية.
+
+### 3. إعداد تخزين شعارات الشركاء:
+1. أنشئ حاوية **Public bucket** باسم `partner-logos` في Supabase Storage.
+2. أضف `SUPABASE_URL` و`SUPABASE_SERVICE_ROLE_KEY` إلى `.env.local` محليًا وإلى أسرار بيئة الاستضافة. يمكن تغيير الاسم عبر `SUPABASE_STORAGE_BUCKET`.
+3. لا تضع مفتاح `service_role` في كود الواجهة أو Git؛ يستخدمه الخادم فقط لرفع الصور.
+4. تُرفع الصور الجديدة إلى التخزين الدائم مباشرةً وتُحفظ روابطها في PostgreSQL. الحد الأقصى 4 ميجابايت، والصيغ المدعومة PNG وJPG وWebP.
+
+لا تحفظ الملفات المرفوعة في `public` أو على القرص المحلي للخادم؛ هذه الملفات قد تختفي عند إعادة النشر أو إعادة تشغيل الاستضافة.
+
+### 4. تشغيل الخادم في وضع التطوير:
 ```bash
 npm run dev
 ```
@@ -68,6 +78,9 @@ npm run dev
 
 | المتغير | الوصف | مثال في الإنتاج |
 | :--- | :--- | :--- |
+| `SUPABASE_URL` | عنوان مشروع Supabase لتخزين الشعارات الدائم | `https://your-project.supabase.co` |
+| `SUPABASE_SERVICE_ROLE_KEY` | مفتاح الخادم لرفع الملفات إلى Supabase Storage؛ سري ولا يُشارك | يُضبط في أسرار الاستضافة فقط |
+| `SUPABASE_STORAGE_BUCKET` | اسم حاوية الشعارات العامة | `partner-logos` |
 | `DATABASE_URL` | رابط الاتصال بقاعدة بيانات PostgreSQL | `postgresql://user:pass@host:5432/dbname?schema=public&sslmode=require` |
 | `JWT_SECRET` | مفتاح سري عالي القوة لتوقيع جلسات المشرفين (32+ حرف) | `f8a9e2d3...` |
 | `CRON_SECRET` | رمز سري لحماية نقطة نهاية الأتمتة المجدولة | `sec_cron_kemics_2026_x9z` |
