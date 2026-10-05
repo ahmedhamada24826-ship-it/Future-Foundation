@@ -26,8 +26,8 @@ const DEFAULT_SETTINGS: SystemSettings = {
   auto_acceptance_enabled: true,
   auto_email_enabled: true,
   email_delay_seconds: 60,
-  email_sender_name: 'Kemix Acadmey',
-  email_sender_address: 'kemixacademy1@gmail.com',
+  email_sender_name: 'Future Foundation | KEMIX Academy',
+  email_sender_address: 'notifications@kemixacademy.me',
   linkedin_share_text: `🎉 I’m excited to share that I’ve been accepted into Future Foundation by Kemix Acadmey!\n\nI’m looking forward to developing my personal and technical skills, exploring new domains, and taking an inspiring step toward the future.\n\n#FutureFoundation\n#KemixAcadmy\n#Learning\n#Skills\n#Future`,
   program_website_url: 'https://kemics.academy',
   partners_title: 'شركاء النجاح',
@@ -56,8 +56,8 @@ export async function getSystemSettings(): Promise<SystemSettings> {
       email_delay_seconds: Number(map.get('email_delay_seconds')) !== undefined && !isNaN(Number(map.get('email_delay_seconds'))) && map.get('email_delay_seconds') !== null
         ? Number(map.get('email_delay_seconds'))
         : DEFAULT_SETTINGS.email_delay_seconds,
-      email_sender_name: map.get('email_sender_name') || process.env.EMAIL_SENDER_NAME || DEFAULT_SETTINGS.email_sender_name,
-      email_sender_address: process.env.EMAIL_FROM || map.get('email_sender_address') || DEFAULT_SETTINGS.email_sender_address,
+      email_sender_name: DEFAULT_SETTINGS.email_sender_name,
+      email_sender_address: DEFAULT_SETTINGS.email_sender_address,
       linkedin_share_text: map.get('linkedin_share_text') || DEFAULT_SETTINGS.linkedin_share_text,
       program_website_url: map.get('program_website_url') || process.env.APP_URL || DEFAULT_SETTINGS.program_website_url,
       partners_title: map.get('partners_title') || DEFAULT_SETTINGS.partners_title,
@@ -72,6 +72,9 @@ export async function getSystemSettings(): Promise<SystemSettings> {
 
 export async function updateSystemSettings(settings: Partial<SystemSettings>): Promise<SystemSettings> {
   for (const [key, val] of Object.entries(settings)) {
+    if (key === 'email_sender_name' || key === 'email_sender_address') {
+      continue;
+    }
     if (val !== undefined && val !== null) {
       await prisma.setting.upsert({
         where: { key },
