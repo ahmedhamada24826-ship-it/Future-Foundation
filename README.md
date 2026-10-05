@@ -118,7 +118,14 @@ npm run dev
 
 ## ⏱️ إعداد الـ Cron Job للأتمتة في الإنتاج
 
-قم بجدولة استدعاء الرابط التالي كل ساعة أو كل 10 دقائق (عبر Vercel Cron أو cron-job.org أو Render Cron):
+يحتوي المستودع على GitHub Actions workflow يستدعي نقطة المعالجة كل 15 دقيقة، ويمكن تشغيله يدويًا من تبويب **Actions**. فعّل GitHub Actions في المستودع واضبط:
+
+* **Repository variable** باسم `APP_URL` يحتوي عنوان الموقع المنشور، مثل `https://example.com`.
+* **Repository secret** باسم `CRON_SECRET` وبنفس قيمة متغير `CRON_SECRET` في بيئة الخادم.
+
+يتوقف الـ workflow بخطأ واضح إذا لم تضبط القيم أو إذا فشل استدعاء الخادم.
+
+بدلًا منه، يمكن إعداد Vercel Cron أو cron-job.org أو Render Cron لاستدعاء الرابط التالي:
 
 ```bash
 curl -X POST "https://your-domain.com/api/cron/process-applications?token=YOUR_CRON_SECRET"
@@ -131,6 +138,7 @@ curl -X POST "https://your-domain.com/api/cron/process-applications" \
 ```
 
 النظام مصمم ليكون **Idempotent** تماماً؛ أي أن تكرار تشغيل الجدولة لن يرسل إيميلات مكررة للمقبولين.
+تعيد المعالجة محاولة إرسال رسائل القبول الفاشلة كل ساعة، بحد أقصى 8 محاولات تلقائية لكل متقدم. تعالج كل دورة 10 رسائل كحد أقصى لتبقى ضمن مهلة التشغيل؛ استخدم الإرسال اليدوي من لوحة الإدارة بعد ذلك.
 
 ---
 

@@ -9,6 +9,7 @@ export interface SendAcceptanceEmailParams {
   fullName: string;
   applicationId: string;
   acceptedAt?: Date;
+  attemptAlreadyCounted?: boolean;
 }
 
 export type EmailDeliveryStatus = 'SENT' | 'FAILED' | 'MOCKED';
@@ -43,6 +44,9 @@ export async function sendAcceptanceEmail(params: SendAcceptanceEmailParams): Pr
     deliveryStatus: 'FAILED',
     provider: 'unconfigured',
   };
+  const attemptCountUpdate = params.attemptAlreadyCounted
+    ? {}
+    : { emailSendAttempts: { increment: 1 } };
 
   try {
     // 1. Production check: If Resend API Key is configured
@@ -145,17 +149,16 @@ export async function sendAcceptanceEmail(params: SendAcceptanceEmailParams): Pr
         data: {
           emailSentAt: new Date(),
           emailLastError: null,
-          emailSendAttempts: { increment: 1 },
+          ...attemptCountUpdate,
         },
       });
     } else if (result.success && result.deliveryStatus === 'MOCKED') {
-      // In dev mock mode, record attempt and mock timestamp
       await prisma.applicant.update({
         where: { id: params.applicantId },
         data: {
-          emailSentAt: new Date(),
+          emailSentAt: null,
           emailLastError: '[DEV-MOCK] Simulated in development',
-          emailSendAttempts: { increment: 1 },
+          ...attemptCountUpdate,
         },
       });
     } else {
@@ -163,7 +166,7 @@ export async function sendAcceptanceEmail(params: SendAcceptanceEmailParams): Pr
         where: { id: params.applicantId },
         data: {
           emailLastError: result.error || 'Failed to dispatch email',
-          emailSendAttempts: { increment: 1 },
+          ...attemptCountUpdate,
         },
       });
     }
@@ -187,7 +190,7 @@ export async function sendAcceptanceEmail(params: SendAcceptanceEmailParams): Pr
       where: { id: params.applicantId },
       data: {
         emailLastError: errorMsg,
-        emailSendAttempts: { increment: 1 },
+        ...attemptCountUpdate,
       },
     });
 

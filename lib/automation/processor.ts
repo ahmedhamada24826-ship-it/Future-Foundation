@@ -20,6 +20,10 @@ export interface AutomationOptions {
   skipDelay?: boolean;
 }
 
+const MAX_EMAILS_PER_RUN = 10;
+const MAX_AUTOMATED_EMAIL_ATTEMPTS = 8;
+const EMAIL_RETRY_INTERVAL_MS = 60 * 60 * 1000;
+
 export async function processAutomaticAcceptance(options?: AutomationOptions): Promise<AutomationResult> {
   const settings = await getSystemSettings();
 
@@ -59,8 +63,7 @@ export async function processAutomaticAcceptance(options?: AutomationOptions): P
     details: [],
   };
 
-  for (let i = 0; i < eligibleApplicants.length; i++) {
-    const applicant = eligibleApplicants[i];
+  for (const applicant of eligibleApplicants) {
     try {
       const acceptedAt = new Date();
 
@@ -82,49 +85,12 @@ export async function processAutomaticAcceptance(options?: AutomationOptions): P
       }
 
       result.acceptedCount += 1;
-      let emailSent = false;
-      let errorMsg: string | undefined = undefined;
-
-      // Send acceptance email if auto email enabled and not already sent (Idempotency guarantee)
-      if (settings.auto_email_enabled) {
-        // Re-verify current record has not already sent email
-        const currentRecord = await prisma.applicant.findUnique({
-          where: { id: applicant.id },
-          select: { emailSentAt: true },
-        });
-
-        if (!currentRecord?.emailSentAt) {
-          const emailResult = await sendAcceptanceEmail({
-            applicantId: applicant.id,
-            email: applicant.email,
-            fullName: applicant.fullName,
-            applicationId: applicant.applicationId,
-            acceptedAt: acceptedAt,
-          });
-
-          if (emailResult.success) {
-            result.emailsSentCount += 1;
-            emailSent = true;
-          } else {
-            result.errorsCount += 1;
-            errorMsg = emailResult.error;
-          }
-        }
-      }
-
       result.details.push({
         applicationId: applicant.applicationId,
         fullName: applicant.fullName,
         status: 'ACCEPTED',
-        emailSent,
-        error: errorMsg,
+        emailSent: false,
       });
-
-      // If an email was sent, and there are more applicants in the queue, apply rate limit delay (default 60s)
-      if (emailSent && i < eligibleApplicants.length - 1 && !options?.skipDelay && emailIntervalMs > 0) {
-        console.log(`[EMAIL-INTERVAL] Waiting ${emailIntervalMs / 1000}s before sending next email...`);
-        await new Promise((resolve) => setTimeout(resolve, emailIntervalMs));
-      }
     } catch (err: any) {
       result.errorsCount += 1;
       result.details.push({
@@ -133,6 +99,93 @@ export async function processAutomaticAcceptance(options?: AutomationOptions): P
         status: 'ERROR',
         emailSent: false,
         error: err?.message || 'Unknown processing error',
+      });
+    }
+  }
+
+  if (!settings.auto_email_enabled) {
+    return result;
+  }
+
+  const retryCutoff = new Date(Date.now() - EMAIL_RETRY_INTERVAL_MS);
+  const emailCandidates = await prisma.applicant.findMany({
+    where: {
+      status: 'ACCEPTED',
+      acceptedAt: { not: null },
+      emailSentAt: null,
+      emailSendAttempts: { lt: MAX_AUTOMATED_EMAIL_ATTEMPTS },
+      emailLogs: { none: { sentAt: { gte: retryCutoff } } },
+    },
+    orderBy: [{ acceptedAt: 'asc' }, { createdAt: 'asc' }],
+    take: MAX_EMAILS_PER_RUN,
+  });
+
+  for (let i = 0; i < emailCandidates.length; i += 1) {
+    const applicant = emailCandidates[i];
+    try {
+      const reservation = await prisma.applicant.updateMany({
+        where: {
+          id: applicant.id,
+          status: 'ACCEPTED',
+          emailSentAt: null,
+          emailSendAttempts: applicant.emailSendAttempts,
+        },
+        data: { emailSendAttempts: { increment: 1 } },
+      });
+      if (reservation.count === 0) {
+        continue;
+      }
+
+      const emailResult = await sendAcceptanceEmail({
+        applicantId: applicant.id,
+        email: applicant.email,
+        fullName: applicant.fullName,
+        applicationId: applicant.applicationId,
+        acceptedAt: applicant.acceptedAt || undefined,
+        attemptAlreadyCounted: true,
+      });
+
+      const detail = result.details.find((item) => item.applicationId === applicant.applicationId);
+      if (emailResult.success && emailResult.deliveryStatus === 'SENT') {
+        result.emailsSentCount += 1;
+        if (detail) {
+          detail.emailSent = true;
+        } else {
+          result.details.push({
+            applicationId: applicant.applicationId,
+            fullName: applicant.fullName,
+            status: 'ACCEPTED',
+            emailSent: true,
+          });
+        }
+      } else if (!emailResult.success) {
+        result.errorsCount += 1;
+        if (detail) {
+          detail.emailSent = false;
+          detail.error = emailResult.error;
+        } else {
+          result.details.push({
+            applicationId: applicant.applicationId,
+            fullName: applicant.fullName,
+            status: 'ACCEPTED',
+            emailSent: false,
+            error: emailResult.error,
+          });
+        }
+      }
+
+      if (i < emailCandidates.length - 1 && !options?.skipDelay && emailIntervalMs > 0) {
+        console.log(`[EMAIL-INTERVAL] Waiting ${emailIntervalMs / 1000}s before sending next email...`);
+        await new Promise((resolve) => setTimeout(resolve, emailIntervalMs));
+      }
+    } catch (err: any) {
+      result.errorsCount += 1;
+      result.details.push({
+        applicationId: applicant.applicationId,
+        fullName: applicant.fullName,
+        status: 'ACCEPTED',
+        emailSent: false,
+        error: err?.message || 'Unknown email processing error',
       });
     }
   }
