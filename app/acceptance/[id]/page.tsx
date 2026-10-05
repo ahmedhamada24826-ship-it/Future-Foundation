@@ -1,11 +1,13 @@
 import React from 'react';
 import { Metadata } from 'next';
-import Image from 'next/image';
 import Link from 'next/link';
 import { prisma } from '@/lib/db/prisma';
+import { getSystemSettings } from '@/lib/settings/settings';
 import { KemixLogo } from '@/components/ui/Logo';
 import { generateLinkedInShareUrl } from '@/lib/linkedin/share';
-import { CheckCircle2, Share2, ExternalLink, Calendar, Award, ArrowLeft, ShieldCheck } from 'lucide-react';
+import { LinkedInShareActions } from '@/components/future-foundation/LinkedInShareActions';
+import { getPublicAppUrl } from '@/lib/public-url';
+import { CheckCircle2, ExternalLink, ShieldCheck } from 'lucide-react';
 
 interface PageProps {
   params: { id: string };
@@ -13,7 +15,7 @@ interface PageProps {
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { id } = params;
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.APP_URL || 'https://kemics.academy';
+  const baseUrl = getPublicAppUrl();
 
   const applicant = await prisma.applicant.findFirst({
     where: { OR: [{ id: id }, { applicationId: id }] },
@@ -57,11 +59,13 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 export default async function AcceptanceCelebrationPage({ params }: PageProps) {
   const { id } = params;
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.APP_URL || 'https://kemics.academy';
-
-  const applicant = await prisma.applicant.findFirst({
-    where: { OR: [{ id: id }, { applicationId: id }] },
-  });
+  const baseUrl = getPublicAppUrl();
+  const [applicant, settings] = await Promise.all([
+    prisma.applicant.findFirst({
+      where: { OR: [{ id: id }, { applicationId: id }] },
+    }),
+    getSystemSettings(),
+  ]);
 
   const applicantName = applicant?.fullName || 'أحمد محمود القاضي';
   const appId = applicant?.applicationId || id;
@@ -69,11 +73,12 @@ export default async function AcceptanceCelebrationPage({ params }: PageProps) {
     ? new Intl.DateTimeFormat('ar-EG', { year: 'numeric', month: 'long', day: 'numeric' }).format(applicant.acceptedAt)
     : new Intl.DateTimeFormat('ar-EG', { year: 'numeric', month: 'long', day: 'numeric' }).format(new Date());
 
-  const currentUrl = `${baseUrl}/acceptance/${appId}`;
+  const currentUrl = `${baseUrl}/acceptance/${encodeURIComponent(appId)}`;
   const { shareUrl, postText } = generateLinkedInShareUrl({
     fullName: applicantName,
     applicationId: appId,
     targetUrl: currentUrl,
+    customText: settings.linkedin_share_text,
   });
 
   return (
@@ -136,22 +141,7 @@ export default async function AcceptanceCelebrationPage({ params }: PageProps) {
               </div>
             </div>
 
-            {/* LinkedIn Share CTA Button */}
-            <div className="pt-2 space-y-3">
-              <a
-                href={shareUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-[#0A66C2] hover:bg-[#084e96] text-white font-bold text-base px-8 py-4 rounded-2xl shadow-lg shadow-blue-700/25 hover:shadow-xl transition-all"
-              >
-                <Share2 className="w-5 h-5" />
-                <span>شارك إنجازك بالبانر على LinkedIn الآن</span>
-              </a>
-
-              <p className="text-xs text-slate-400">
-                * ستتم مشاركة رابط بطاقة القبول؛ ويجلب LinkedIn البانر من معاينة الصفحة. قد يتأخر ظهور الصورة بسبب ذاكرة LinkedIn المؤقتة.
-              </p>
-            </div>
+            <LinkedInShareActions shareUrl={shareUrl} postText={postText} />
 
           </div>
 

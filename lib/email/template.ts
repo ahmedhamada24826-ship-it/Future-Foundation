@@ -1,4 +1,4 @@
-import { generateLinkedInShareUrl } from '@/lib/linkedin/share';
+import { getPublicAppUrl } from '@/lib/public-url';
 
 export interface EmailTemplateData {
   fullName?: string | null;
@@ -46,13 +46,8 @@ export function renderAcceptanceEmailHtml(data: EmailTemplateData): string {
     formattedDate = new Date().toLocaleDateString('ar-EG');
   }
 
-  const publicAppUrl = (process.env.NEXT_PUBLIC_APP_URL || process.env.APP_URL || safeWebsiteUrl).replace(/\/+$/, '');
+  const publicAppUrl = getPublicAppUrl(safeWebsiteUrl);
   const shareTargetUrl = `${publicAppUrl}/acceptance/${encodeURIComponent(safeAppId)}`;
-  const { shareUrl } = generateLinkedInShareUrl({
-    fullName: safeFullName,
-    applicationId: safeAppId,
-    targetUrl: shareTargetUrl,
-  });
 
   const bannerImageUrl = `${publicAppUrl}/images/acceptance-banner.png`;
 
@@ -180,8 +175,8 @@ export function renderAcceptanceEmailHtml(data: EmailTemplateData): string {
                 </p>
 
                 <!-- LinkedIn Share Button -->
-                <a href="${shareUrl}" target="_blank" class="cta-button" style="display: inline-block; background-color: #0A66C2; color: #FFFFFF; font-size: 15px; font-weight: 700; padding: 14px 28px; border-radius: 10px; text-decoration: none; margin-bottom: 12px; box-shadow: 0 4px 12px rgba(10, 102, 194, 0.25);">
-                  <span style="margin-left: 8px;">🔗</span> شارك إنجازك على LinkedIn
+                <a href="${shareTargetUrl}" target="_blank" rel="noopener noreferrer" class="cta-button" style="display: inline-block; background-color: #0A66C2; color: #FFFFFF; font-size: 15px; font-weight: 700; padding: 14px 28px; border-radius: 10px; text-decoration: none; margin-bottom: 12px; box-shadow: 0 4px 12px rgba(10, 102, 194, 0.25);">
+                  <span style="margin-left: 8px;">🔗</span> افتح بطاقة القبول وانسخ نص المشاركة إلى LinkedIn
                 </a>
 
                 <!-- WhatsApp Group Button -->
