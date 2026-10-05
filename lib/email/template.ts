@@ -1,5 +1,4 @@
 import { generateLinkedInShareUrl } from '@/lib/linkedin/share';
-import { BANNER_DATA_URI } from '@/lib/email/banner-data';
 
 export interface EmailTemplateData {
   fullName?: string | null;
@@ -47,16 +46,15 @@ export function renderAcceptanceEmailHtml(data: EmailTemplateData): string {
     formattedDate = new Date().toLocaleDateString('ar-EG');
   }
 
-  // Generate personalized share URL pointing to celebration badge page
-  const shareTargetUrl = `${safeWebsiteUrl}/acceptance/${safeAppId}`;
+  const publicAppUrl = (process.env.NEXT_PUBLIC_APP_URL || process.env.APP_URL || safeWebsiteUrl).replace(/\/+$/, '');
+  const shareTargetUrl = `${publicAppUrl}/acceptance/${encodeURIComponent(safeAppId)}`;
   const { shareUrl } = generateLinkedInShareUrl({
     fullName: safeFullName,
     applicationId: safeAppId,
     targetUrl: shareTargetUrl,
   });
 
-  // Embed banner as base64 data URI so it always shows in all email clients
-  const bannerImageUrl = BANNER_DATA_URI || `${safeWebsiteUrl}/images/acceptance-banner.png`;
+  const bannerImageUrl = `${publicAppUrl}/images/acceptance-banner.png`;
 
   return `
 <!DOCTYPE html>
