@@ -186,6 +186,13 @@ export function renderAcceptanceEmailHtml(data: EmailTemplateData): string {
                   <span style="margin-left: 8px;">🔗</span> شارك إنجازك على LinkedIn
                 </a>
 
+                <!-- WhatsApp Group Button -->
+                <div style="margin-top: 8px;">
+                  <a href="https://chat.whatsapp.com/Iye3ObKoHFXKCgMJccVdgY" target="_blank" style="display: inline-block; background-color: #25D366; color: #FFFFFF; font-size: 15px; font-weight: 700; padding: 14px 28px; border-radius: 10px; text-decoration: none; box-shadow: 0 4px 12px rgba(37, 211, 102, 0.25);">
+                    <span style="margin-left: 8px;">💬</span> انضم إلى مجموعة واتساب
+                  </a>
+                </div>
+
                 <!-- Secondary Website CTA -->
                 <div style="margin-top: 10px;">
                   <a href="${safeWebsiteUrl}" target="_blank" style="color: #2563EB; font-size: 14px; font-weight: 600; text-decoration: none;">
