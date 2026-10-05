@@ -1,20 +1,13 @@
+import { Prisma } from '@prisma/client';
 import { prisma } from '@/lib/db/prisma';
 
 export const INITIAL_PARTNERS = [
-  {
-    name: 'سند شباب الدلتا',
-    category: 'وزارة الشباب والرياضة',
-    logoUrl: '/images/partners/partner-delta-youth.png',
-    darkCard: false,
-    order: 1,
-    isActive: true,
-  },
   {
     name: 'اتحاد طلاب تحيا مصر',
     category: 'محافظة كفر الشيخ',
     logoUrl: '/images/partners/partner-tahya-misr.png',
     darkCard: false,
-    order: 2,
+    order: 1,
     isActive: true,
   },
   {
@@ -22,7 +15,7 @@ export const INITIAL_PARTNERS = [
     category: 'شريك تكنولوجي واستثماري',
     logoUrl: '/images/partners/partner-vinance-transparent.png',
     darkCard: true,
-    order: 3,
+    order: 2,
     isActive: true,
   },
   {
@@ -30,28 +23,64 @@ export const INITIAL_PARTNERS = [
     category: 'مجتمع البرمجة والتطوير',
     logoUrl: '/images/partners/partner-cobra-code-transparent.png',
     darkCard: true,
+    order: 3,
+    isActive: true,
+  },
+  {
+    name: 'Nerva AI',
+    category: 'حلول الذكاء الاصطناعي',
+    logoUrl: '/images/partners/partner-nerva-ai.png',
+    darkCard: false,
     order: 4,
     isActive: true,
   },
   {
-    name: 'N-Wave',
-    category: 'حلول وإبداع رقمي',
-    logoUrl: '/images/partners/partner-n-wave.png',
+    name: 'سفر الكتابة',
+    category: '',
+    logoUrl: '/images/partners/partner-safar-al-ketaba.png',
     darkCard: false,
     order: 5,
+    isActive: true,
+  },
+  {
+    name: 'Sand Delta',
+    category: '',
+    logoUrl: '/images/partners/partner-sand-delta.png',
+    darkCard: false,
+    order: 6,
     isActive: true,
   },
 ];
 
 export async function ensureDefaultPartners() {
-  try {
-    const count = await prisma.partner.count();
-    if (count === 0) {
-      for (const partner of INITIAL_PARTNERS) {
-        await prisma.partner.create({ data: partner });
+  const logoUrls = INITIAL_PARTNERS.map((partner) => partner.logoUrl);
+
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    try {
+      await prisma.$transaction(
+        async (transaction) => {
+          const existing = await transaction.partner.findMany({
+            where: { logoUrl: { in: logoUrls } },
+            select: { logoUrl: true },
+          });
+          const existingLogoUrls = new Set(existing.map((partner) => partner.logoUrl));
+          const missingPartners = INITIAL_PARTNERS.filter(
+            (partner) => !existingLogoUrls.has(partner.logoUrl)
+          );
+
+          if (missingPartners.length > 0) {
+            await transaction.partner.createMany({ data: missingPartners });
+          }
+        },
+        { isolationLevel: Prisma.TransactionIsolationLevel.Serializable }
+      );
+      return;
+    } catch (error) {
+      const isSerializationConflict =
+        error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2034';
+      if (!isSerializationConflict || attempt === 2) {
+        throw error;
       }
     }
-  } catch (e) {
-    console.error('Error seeding default partners:', e);
   }
 }

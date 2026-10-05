@@ -5,19 +5,11 @@ const prisma = new PrismaClient();
 
 const INITIAL_PARTNERS = [
   {
-    name: 'سند شباب الدلتا',
-    category: 'وزارة الشباب والرياضة',
-    logoUrl: '/images/partners/partner-delta-youth.png',
-    darkCard: false,
-    order: 1,
-    isActive: true,
-  },
-  {
     name: 'اتحاد طلاب تحيا مصر',
     category: 'محافظة كفر الشيخ',
     logoUrl: '/images/partners/partner-tahya-misr.png',
     darkCard: false,
-    order: 2,
+    order: 1,
     isActive: true,
   },
   {
@@ -25,7 +17,7 @@ const INITIAL_PARTNERS = [
     category: 'شريك تكنولوجي واستثماري',
     logoUrl: '/images/partners/partner-vinance-transparent.png',
     darkCard: true,
-    order: 3,
+    order: 2,
     isActive: true,
   },
   {
@@ -33,15 +25,31 @@ const INITIAL_PARTNERS = [
     category: 'مجتمع البرمجة والتطوير',
     logoUrl: '/images/partners/partner-cobra-code-transparent.png',
     darkCard: true,
+    order: 3,
+    isActive: true,
+  },
+  {
+    name: 'Nerva AI',
+    category: 'حلول الذكاء الاصطناعي',
+    logoUrl: '/images/partners/partner-nerva-ai.png',
+    darkCard: false,
     order: 4,
     isActive: true,
   },
   {
-    name: 'N-Wave',
-    category: 'حلول وإبداع رقمي',
-    logoUrl: '/images/partners/partner-n-wave.png',
+    name: 'سفر الكتابة',
+    category: '',
+    logoUrl: '/images/partners/partner-safar-al-ketaba.png',
     darkCard: false,
     order: 5,
+    isActive: true,
+  },
+  {
+    name: 'Sand Delta',
+    category: '',
+    logoUrl: '/images/partners/partner-sand-delta.png',
+    darkCard: false,
+    order: 6,
     isActive: true,
   },
 ];
@@ -106,16 +114,17 @@ async function main() {
   }
   console.log('✅ System settings initialized/preserved.');
 
-  // 3. Seed Initial Partners if table is empty (Safe & Non-destructive)
-  const partnersCount = await prisma.partner.count();
-  if (partnersCount === 0) {
-    for (const partner of INITIAL_PARTNERS) {
+  // 3. Seed missing default partners without overwriting existing records
+  for (const partner of INITIAL_PARTNERS) {
+    const existingPartner = await prisma.partner.findFirst({
+      where: { logoUrl: partner.logoUrl },
+      select: { id: true },
+    });
+    if (!existingPartner) {
       await prisma.partner.create({ data: partner });
     }
-    console.log(`✅ Seeded ${INITIAL_PARTNERS.length} default success partners.`);
-  } else {
-    console.log(`ℹ️ Partners already exist (${partnersCount} found). Skipping partner creation.`);
   }
+  console.log(`✅ Verified ${INITIAL_PARTNERS.length} default success partners without overwriting existing records.`);
 
   console.log('🎉 Production database initialization completed safely without deleting any data.');
 }
