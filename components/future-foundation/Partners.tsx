@@ -71,11 +71,19 @@ export const Partners: React.FC = () => {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-5">
+        <div
+          className={
+            partners.length === 1
+              ? 'flex justify-center'
+              : 'grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-5'
+          }
+        >
           {partners.map((partner, index) => (
             <div
               key={partner.id || index}
-              className={`group relative overflow-hidden rounded-[28px] border p-0 transition-all duration-300 hover:-translate-y-1 ${
+              className={`group relative w-full overflow-hidden rounded-[28px] border p-0 transition-all duration-300 hover:-translate-y-1 ${
+                partners.length === 1 ? 'max-w-sm' : ''
+              } ${
                 partner.darkCard
                   ? 'border-slate-800 bg-[#071827] text-white shadow-[0_18px_40px_rgba(15,23,42,0.35)] hover:border-blue-400/70 hover:shadow-[0_24px_55px_rgba(37,99,235,0.2)]'
                   : 'border-slate-200/80 bg-white text-slate-800 shadow-[0_14px_30px_rgba(15,23,42,0.06)] hover:border-kemix-blue/40 hover:shadow-[0_18px_35px_rgba(59,130,246,0.12)]'
