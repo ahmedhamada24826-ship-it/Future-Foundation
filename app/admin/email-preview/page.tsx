@@ -37,7 +37,7 @@ export default function EmailPreviewPage() {
               قالب بريد القبول الرسمي (Acceptance Email)
             </h1>
             <p className="text-xs text-slate-500 mt-1">
-              تصميم متوافق مع الهوية البصرية لـ Kemix Acadmey ومزود بـ Dynamic Banner وزر مشاركة LinkedIn.
+              تصميم متوافق مع الهوية البصرية لـ Kemix Acadmey، مع بانر القبول وزري LinkedIn وWhatsApp.
             </p>
           </div>
 

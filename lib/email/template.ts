@@ -48,6 +48,7 @@ export function renderAcceptanceEmailHtml(data: EmailTemplateData): string {
 
   const publicAppUrl = getPublicAppUrl(safeWebsiteUrl);
   const shareTargetUrl = `${publicAppUrl}/acceptance/${encodeURIComponent(safeAppId)}`;
+  const linkedInShareUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(shareTargetUrl)}`;
 
   const bannerImageUrl = `${publicAppUrl}/images/acceptance-banner.png`;
 
@@ -69,6 +70,7 @@ export function renderAcceptanceEmailHtml(data: EmailTemplateData): string {
       .header-title { font-size: 20px !important; }
       .banner-name { font-size: 22px !important; }
       .cta-button { width: 100% !important; box-sizing: border-box !important; text-align: center !important; }
+      .cta-column { display: block !important; width: 100% !important; padding: 0 0 10px !important; }
     }
   </style>
 </head>
@@ -168,7 +170,28 @@ export function renderAcceptanceEmailHtml(data: EmailTemplateData): string {
               </table>
 
               <!-- Action CTAs Section -->
-              <div style="text-align: center; margin: 32px 0 16px 0;">
+              <div style="text-align: center; margin: 28px 0 18px 0; padding: 22px 18px; background-color: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 14px;">
+                <p style="font-size: 18px; font-weight: 800; color: #0B2D5B; margin: 0 0 6px;">
+                  خطوتك القادمة تبدأ من هنا 🎉
+                </p>
+                <p style="font-size: 13px; color: #64748B; line-height: 1.7; margin: 0 0 18px;">
+                  انضم لمجتمع المبادرة وشارك خبر قبولك مع أصدقائك.
+                </p>
+                <table role="presentation" align="center" border="0" cellspacing="0" cellpadding="0" style="margin: 0 auto;">
+                  <tr>
+                    <td class="cta-column" align="center" style="padding: 0 5px;">
+                      <a href="${linkedInShareUrl}" target="_blank" rel="noopener noreferrer" class="cta-button" style="display: inline-block; background-color: #0A66C2; color: #FFFFFF; font-size: 14px; font-weight: 700; padding: 13px 20px; border-radius: 10px; text-decoration: none; box-shadow: 0 4px 12px rgba(10, 102, 194, 0.2);">
+                        🔗 شارك نجاحك على LinkedIn بالبانر
+                      </a>
+                    </td>
+                    <td class="cta-column" align="center" style="padding: 0 5px;">
+                      <a href="https://chat.whatsapp.com/KAJHxlk5cdJCzYhOxJEkKK" target="_blank" rel="noopener noreferrer" class="cta-button" style="display: inline-block; background-color: #25D366; color: #FFFFFF; font-size: 14px; font-weight: 700; padding: 13px 20px; border-radius: 10px; text-decoration: none; box-shadow: 0 4px 12px rgba(37, 211, 102, 0.2);">
+                        💬 الانضمام لجروب المبادرة
+                      </a>
+                    </td>
+                  </tr>
+                </table>
+
                 <!-- Secondary Website CTA -->
                 <div style="margin-top: 10px;">
                   <a href="${safeWebsiteUrl}" target="_blank" style="color: #2563EB; font-size: 14px; font-weight: 600; text-decoration: none;">
