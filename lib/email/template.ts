@@ -169,23 +169,6 @@ export function renderAcceptanceEmailHtml(data: EmailTemplateData): string {
 
               <!-- Action CTAs Section -->
               <div style="text-align: center; margin: 32px 0 16px 0;">
-                
-                <p style="font-size: 15px; font-weight: 700; color: #0B2D5B; margin-bottom: 14px;">
-                  شارك نجاحك وانضمامك للبرنامج مع شبكة علاقاتك على LinkedIn بالبانر الرسمي:
-                </p>
-
-                <!-- LinkedIn Share Button -->
-                <a href="${shareTargetUrl}" target="_blank" rel="noopener noreferrer" class="cta-button" style="display: inline-block; background-color: #0A66C2; color: #FFFFFF; font-size: 15px; font-weight: 700; padding: 14px 28px; border-radius: 10px; text-decoration: none; margin-bottom: 12px; box-shadow: 0 4px 12px rgba(10, 102, 194, 0.25);">
-                  <span style="margin-left: 8px;">🔗</span> افتح بطاقة القبول وانسخ نص المشاركة إلى LinkedIn
-                </a>
-
-                <!-- WhatsApp Group Button -->
-                <div style="margin-top: 8px;">
-                  <a href="https://chat.whatsapp.com/Iye3ObKoHFXKCgMJccVdgY" target="_blank" style="display: inline-block; background-color: #25D366; color: #FFFFFF; font-size: 15px; font-weight: 700; padding: 14px 28px; border-radius: 10px; text-decoration: none; box-shadow: 0 4px 12px rgba(37, 211, 102, 0.25);">
-                    <span style="margin-left: 8px;">💬</span> انضم إلى مجموعة واتساب
-                  </a>
-                </div>
-
                 <!-- Secondary Website CTA -->
                 <div style="margin-top: 10px;">
                   <a href="${safeWebsiteUrl}" target="_blank" style="color: #2563EB; font-size: 14px; font-weight: 600; text-decoration: none;">
